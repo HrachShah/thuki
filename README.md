@@ -257,3 +257,4 @@ Have a feature idea? [Open an issue](https://github.com/quiet-node/thuki/issues)
 
 Copyright 2026 Logan Nguyen. Licensed under the [Apache License, Version 2.0](LICENSE).
 # Zo Bot Contribution
+fix
