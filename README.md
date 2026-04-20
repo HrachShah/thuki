@@ -1,7 +1,7 @@
 
 
 <h1 align="center">
-  Thuki - WIP
+  Thuki
 </h1>
 
 <p align="center">
