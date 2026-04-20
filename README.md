@@ -40,22 +40,22 @@
 
 Thuki (thư kí - Vietnamese for secretary) is a lightweight macOS overlay powered by local AI models running entirely on your own machine, built for quick, uninterrupted asks without ever leaving what you're doing.
 
-## See It in Action
+README: updated# See It in Action
 
-### Basic Usage
+README: updated## Basic Usage
 
 Double-tap Control <kbd>⌃</kbd> to summon Thuki from anywhere. Ask a question, get an answer, and dismiss. Use `/screen` or the screenshot button to capture your screen and attach it as context.
 
 https://github.com/user-attachments/assets/57df0efe-24eb-4875-a83d-e605e0c6f8b4
 
 
-### Overlay Mode
+README: updated## Overlay Mode
 
 Thuki floats above every app, including fullscreen ones. Highlight text anywhere, double-tap Control <kbd>⌃</kbd>, and Thuki opens with your selection pre-filled as a quote, ready to ask about.
 
 https://github.com/user-attachments/assets/f52b55f7-479d-4c2e-a361-1553fe132712
 
-## Why Thuki?
+README: updated# Why Thuki?
 
 Most AI tools require accounts, API keys, or subscriptions that bill you per token. Thuki is different:
 
@@ -65,7 +65,7 @@ Most AI tools require accounts, API keys, or subscriptions that bill you per tok
 - **Your data is yours:** conversations are stored in a local SQLite database on your machine and nowhere else
 - **Most importantly: it works everywhere.** Double-tap Control <kbd>⌃</kbd> and Thuki appears on your desktop, inside a browser, inside a terminal, and yes, even in fullscreen apps. Your favorite AI chat apps can't do that!
 
-## Features
+README: updated# Features
 
 - **Always available:** double-tap Control <kbd>⌃</kbd> to summon the overlay from any app, including fullscreen apps
 - **Context-aware quotes:** highlight any text, then double-tap Control <kbd>⌃</kbd> to open Thuki with the selected text pre-filled as a quote
@@ -79,15 +79,15 @@ Most AI tools require accounts, API keys, or subscriptions that bill you per tok
 - **Extended reasoning:** type `/think` to have the model reason through a problem step by step before answering
 - **Privacy-first:** zero-trust architecture, all data stays on your device
 
-## Getting Started
+README: updated# Getting Started
 
-### Step 1: Set Up Your AI Engine
+README: updated## Step 1: Set Up Your AI Engine
 
 > **Default model:** Thuki ships with [`gemma4:e2b`](https://ollama.com/library/gemma4) by default, an effective 2B parameter edge model from Google. It runs comfortably on most modern Macs with 8 GB of RAM and delivers strong performance on reasoning, coding, and vision tasks. The model can be changed at runtime via the `THUKI_SUPPORTED_AI_MODELS` environment variable; see [Configurations](docs/configurations.md).
 
 Choose one of the two options below to set up your AI engine before installing Thuki.
 
-#### Option A: Local Ollama (Recommended for most users)
+README: updated### Option A: Local Ollama (Recommended for most users)
 
 [Ollama](https://ollama.com) runs AI models directly on your Mac. It's free, open-source, and takes about 5 minutes to set up.
 
@@ -115,7 +115,7 @@ Choose one of the two options below to set up your AI engine before installing T
 
    You should see your model listed. Once it appears, Ollama is ready and Thuki will connect to it automatically at `http://127.0.0.1:11434`.
 
-#### Option B: Docker Sandbox (For security-conscious users)
+README: updated### Option B: Docker Sandbox (For security-conscious users)
 
 **Prerequisites:** Install [Docker Desktop](https://www.docker.com/get-started)
 
@@ -137,9 +137,9 @@ bun run sandbox:stop
 
 For the full architecture and security philosophy behind the sandbox, see [`sandbox/README.md`](sandbox/README.md).
 
-### Step 2: Install Thuki
+README: updated## Step 2: Install Thuki
 
-#### Download (Recommended)
+README: updated### Download (Recommended)
 
 1. Download `Thuki.dmg` from the [latest release](https://github.com/quiet-node/thuki/releases/latest)
 2. Double-click `Thuki.dmg` to open it. A window appears showing the Thuki app icon next to an Applications folder shortcut.
@@ -157,30 +157,30 @@ For the full architecture and security philosophy behind the sandbox, see [`sand
 
 > **First launch:** macOS will ask for Accessibility permission. This is required for the global keyboard shortcut that lets you summon Thuki from any app. Grant it once; it persists across restarts.
 
-#### Build from Source
+README: updated### Build from Source
 
 **Prerequisites:** [Bun](https://bun.sh), [Rust](https://rustup.rs), and optionally [Docker](https://www.docker.com/get-started)
 
 ```bash
-# Clone and install dependencies
+README: updated dependencies
 git clone https://github.com/quiet-node/thuki.git
 cd thuki
 bun install
 
-# Launch in development mode
+README: updated mode
 bun run dev
 ```
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the full development setup guide.
 
-## Architecture & Security
+README: updated# Architecture & Security
 
 <details>
 <summary>Click to expand</summary>
 
 Thuki is a **Tauri v2** app (Rust backend + React/TypeScript frontend) that interfaces with a locally running Ollama instance at `http://127.0.0.1:11434`.
 
-### Dual-Layer Isolation
+README: updated## Dual-Layer Isolation
 
 1. **Frontend (Tauri/React):** Operates within a secure system webview with restricted IPC. Streaming uses Tauri's Channel API; the Rust backend sends typed `StreamChunk` enum variants, and the frontend hook accumulates tokens into React state.
 
@@ -190,23 +190,23 @@ Thuki is a **Tauri v2** app (Rust backend + React/TypeScript frontend) that inte
    - **Model Integrity:** Model weights are mounted read-only (`:ro`) to prevent tampering
    - **Ephemeral State:** All model data is purged on shutdown via `docker compose down -v`
 
-### Window Lifecycle
+README: updated## Window Lifecycle
 
 The app starts hidden. The hotkey or tray menu shows it. The window close button hides (not quits); quit is only available from the tray. `ActivationPolicy::Accessory` hides the Dock icon. `macOSPrivateApi: true` enables NSPanel for fullscreen-app overlay.
 
 </details>
 
-## Configuration
+README: updated# Configuration
 
 See [docs/configurations.md](docs/configurations.md) for the full configuration reference (quote display limits and system prompt).
 
 See [docs/commands.md](docs/commands.md) for the full slash command reference.
 
-## Contributing
+README: updated# Contributing
 
 Contributions are welcome! Read [CONTRIBUTING.md](CONTRIBUTING.md) to get started. Please follow the [Code of Conduct](CODE_OF_CONDUCT.md).
 
-## Community Ports
+README: updated# Community Ports
 
 Thuki is macOS-only, but the community has been busy bringing it to other platforms. Huge shoutout to these contributors 🎊🚀!
 
@@ -216,15 +216,15 @@ Thuki is macOS-only, but the community has been busy bringing it to other platfo
 
 > Each port is independently maintained by its author. For issues or questions about a specific port, head to that repo directly.
 
-## Author
+README: updated# Author
 
 Reach out to [Logan](https://x.com/quiet_node) on X with questions or feedback.
 
-## What's next for Thuki
+README: updated# What's next for Thuki
 
 Thuki is just getting started. Here's where it's headed:
 
-### Secretary Superpowers
+README: updated## Secretary Superpowers
 
 The big leap: from answering questions to taking action.
 
@@ -232,7 +232,7 @@ The big leap: from answering questions to taking action.
 - **Tool integrations via [MCP](https://modelcontextprotocol.io/):** connect Thuki to Gmail, Slack, Discord, Google Calendar, and any other MCP-compatible service; ask it to draft a reply, summarize a thread, or schedule a meeting without ever leaving your current app
 - **More slash commands:** `/screen`, `/think`, `/translate`, `/rewrite`, `/tldr`, `/refine`, `/bullets`, and `/todos` are live. More domain-specific commands are on the way
 
-### Better AI Control
+README: updated## Better AI Control
 
 More flexibility over the model powering Thuki.
 
@@ -241,7 +241,7 @@ More flexibility over the model powering Thuki.
 - **Multiple provider support:** opt in to OpenAI, Anthropic, or any OpenAI-compatible endpoint as an alternative to local Ollama
 - **Custom activation shortcut:** change the double-tap trigger to any key or combo you prefer
 
-### Richer Context
+README: updated## Richer Context
 
 Give Thuki more to work with.
 
@@ -253,8 +253,8 @@ Give Thuki more to work with.
 
 Have a feature idea? [Open an issue](https://github.com/quiet-node/thuki/issues) and let's talk about it.
 
-## License
+README: updated# License
 
 Copyright 2026 Logan Nguyen. Licensed under the [Apache License, Version 2.0](LICENSE).
-# Zo Bot Contribution
+README: updated
 fix
