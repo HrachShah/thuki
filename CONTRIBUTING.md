@@ -207,3 +207,4 @@ Key style rules:
 New to the codebase? Look for issues tagged [`good first issue`](https://github.com/quiet-node/thuki/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22) on GitHub. These are scoped to be approachable without deep knowledge of the full system.
 
 If you have a question or want to discuss an approach before writing code, open an issue or start a discussion; we're happy to help.
+## Zo Bot\nAutomated contributions enabled.
