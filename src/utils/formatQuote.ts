@@ -25,7 +25,7 @@ export function formatQuotedText(
     }
 
     const trimmed = line.trim();
-    // Skip empty lines but don't count them against the line limit
+    // Skip empty lines without counting them toward the line limit
     if (!trimmed) continue;
 
     // If adding this line would exceed char limit, truncate and stop
