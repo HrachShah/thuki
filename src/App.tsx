@@ -27,6 +27,7 @@ import {
   COMMANDS,
   SCREEN_CAPTURE_PLACEHOLDER,
   buildPrompt,
+  sanitizeControlChars,
 } from './config/commands';
 import './App.css';
 
@@ -623,7 +624,7 @@ function App() {
    *
    * When the deleted conversation is the currently active one, only the
    * persistence state (`resetHistory`) is cleared — messages remain visible
-   * so the user can continue chatting or re-save. The error is intentionally
+   * so the user can continue chatting or re-saving. The error is intentionally
    * re-thrown so `HistoryPanel` can roll back its optimistic removal.
    */
   const handleDeleteConversation = useCallback(
@@ -872,13 +873,8 @@ function App() {
    */
   const handleScreenSubmit = useCallback(
     async (fullQuery: string, think?: boolean) => {
-      // eslint-disable-next-line no-control-regex
-      const CONTROL_CHARS = /[\x00-\x08\x0b\x0c\x0e-\x1f]/g;
-      const sanitized = selectedContext
-        ?.replace(CONTROL_CHARS, '')
-        .slice(0, quote.maxContextLength);
-      const context = sanitized?.trim() ? sanitized : undefined;
-
+      const sanitized = sanitizeControlChars(selectedContext);
+      const context = sanitized?.trim() ? sanitized.slice(0, quote.maxContextLength) : undefined;
       // Snapshot display paths for the pending bubble: use resolved file paths
       // for already-processed images, blob URLs for still-processing ones.
       const existingDisplayPaths = attachedImages.map(
@@ -1002,12 +998,8 @@ function App() {
     if (utilityTrigger) {
       // Sanitize selectedContext before passing to buildPrompt so that control
       // characters from a hostile host-app selection cannot reach the model prompt.
-      // eslint-disable-next-line no-control-regex
-      const CONTROL_CHARS = /[\x00-\x08\x0b\x0c\x0e-\x1f]/g;
-      const sanitized = selectedContext
-        ?.replace(CONTROL_CHARS, '')
-        .slice(0, quote.maxContextLength);
-      const context = sanitized?.trim() ? sanitized : undefined;
+      const context = sanitizeControlChars(selectedContext);
+      const trimmed = context?.trim() ? context.slice(0, quote.maxContextLength) : undefined;
 
       const composedPrompt = buildPrompt(
         utilityTrigger,
@@ -1070,12 +1062,8 @@ function App() {
 
     // Sanitize externally-sourced context: strip control characters and enforce
     // a length cap to limit prompt-injection surface from host-app selections.
-    // eslint-disable-next-line no-control-regex
-    const CONTROL_CHARS = /[\x00-\x08\x0b\x0c\x0e-\x1f]/g;
-    const sanitized = selectedContext
-      ?.replace(CONTROL_CHARS, '')
-      .slice(0, quote.maxContextLength);
-    const context = sanitized?.trim() ? sanitized : undefined;
+    const sanitized = sanitizeControlChars(selectedContext);
+    const context = sanitized?.trim() ? sanitized.slice(0, quote.maxContextLength) : undefined;
 
     // If all images are ready (or there are none), submit immediately.
     const hasPendingImages = attachedImages.some(
@@ -1397,7 +1385,7 @@ function App() {
                   always sticks to the bottom without spring animation lag.
                   A CSS `transition: min-height` drives smooth window growth
                   when the chat-mode history dropdown is open; the existing
-                  ResizeObserver fires per-frame and calls setSize() so the
+                  ResizeObserver fires per-frame and calls `setSize()` so the
                   native window tracks the animation. The dropdown is a sibling
                   (not a child) so overflow-hidden never clips it. */}
               <div

@@ -72,6 +72,20 @@ export const COMMANDS: readonly Command[] = [
   },
 ] as const;
 
+/** Regular expression to match ASCII control characters (C0 controls). */
+const CONTROL_CHARS = /[\x00-\x08\x0b\x0c\x0e-\x1f]/g;
+
+/**
+ * Remove control characters from externally-sourced text such as selected
+ * context from a host application. This prevents prompt-injection attacks
+ * where a malicious selection could embed hidden control sequences.
+ * The caller should apply length capping separately (e.g. via quote.maxContextLength).
+ */
+export function sanitizeControlChars(text: string | undefined): string | undefined {
+  if (!text) return text;
+  return text.replace(CONTROL_CHARS, '');
+}
+
 /**
  * Sentinel image-path value used as a loading placeholder while the
  * /screen capture is in flight. ChatBubble detects this value and
