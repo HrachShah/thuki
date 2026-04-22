@@ -171,7 +171,8 @@ export function useOllama(
         setIsGenerating(false);
       }
     },
-    [isGenerating, onTurnComplete],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isGenerating],
   );
 
   /** Cancels the currently active generation by signalling the Rust backend. */
