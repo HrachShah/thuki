@@ -12,7 +12,7 @@ function ollamaStreamResponse(tokens: string[]) {
 }
 
 export const handlers = [
-  http.post(`${OLLAMA_URL}/api/generate`, () => {
+  http.post(`${OLLAMA_URL}/api/chat`, () => {
     return ollamaStreamResponse(['Hello', ' world', '!']);
   }),
 ];
