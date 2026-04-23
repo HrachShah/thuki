@@ -623,7 +623,7 @@ function App() {
    *
    * When the deleted conversation is the currently active one, only the
    * persistence state (`resetHistory`) is cleared — messages remain visible
-   * so the user can continue chatting or re-save. The error is intentionally
+   * so the user can continue chatting or re-saving. The error is intentionally
    * re-thrown so `HistoryPanel` can roll back its optimistic removal.
    */
   const handleDeleteConversation = useCallback(
@@ -963,7 +963,8 @@ function App() {
   const handleSubmit = useCallback(() => {
     if (
       (query.trim().length === 0 && attachedImages.length === 0) ||
-      isGenerating
+      isGenerating ||
+      isSubmitPending
     )
       return;
 
@@ -1118,6 +1119,7 @@ function App() {
     setSelectedContext,
     attachedImages,
     setCaptureError,
+    isSubmitPending,
   ]);
 
   // When a pending submit exists and all images finish processing, fire it.
@@ -1397,7 +1399,7 @@ function App() {
                   always sticks to the bottom without spring animation lag.
                   A CSS `transition: min-height` drives smooth window growth
                   when the chat-mode history dropdown is open; the existing
-                  ResizeObserver fires per-frame and calls setSize() so the
+                  ResizeObserver fires per-frame and calls `setSize()` so the
                   native window tracks the animation. The dropdown is a sibling
                   (not a child) so overflow-hidden never clips it. */}
               <div
@@ -1447,9 +1449,9 @@ function App() {
                     {isHistoryOpen ? (
                       <motion.div
                         key="ask-bar-history"
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
+                        initial={{ opacity: 0, y: -8, scale: 0.97 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -8, scale: 0.97 }}
                         transition={{
                           height: {
                             duration: 0.3,
