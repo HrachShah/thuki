@@ -168,23 +168,29 @@ mod macos {
         // Poll the pasteboard with exponential backoff instead of a fixed sleep.
         // Fast machines return in ~10ms; slower machines get up to ~150ms total.
         let mut after = before.clone();
+        let mut clipboard_changed = false;
         for delay_ms in [10, 20, 40, 80] {
             std::thread::sleep(std::time::Duration::from_millis(delay_ms));
             after = clipboard_text();
             if after != before {
+                clipboard_changed = true;
                 break;
             }
         }
-        // Always restore the original clipboard regardless of outcome.
-        if after != before {
+        // Always restore the original clipboard — even if the copy command
+        // silently failed (e.g. focused app doesn't support Cmd+C), restoring
+        // prevents the user's original clipboard from being permanently lost.
+        if clipboard_changed {
+            write_clipboard(&before);
+            let trimmed = after.trim().to_string();
+            if !trimmed.is_empty() {
+                return Some(trimmed);
+            }
+        } else {
+            // No clipboard change detected — still restore to be safe.
             write_clipboard(&before);
         }
-        let trimmed = after.trim().to_string();
-        if after != before && !trimmed.is_empty() {
-            Some(trimmed)
-        } else {
-            None
-        }
+        None
     }
 
     unsafe fn focused_element() -> Option<AXUIElementRef> {
