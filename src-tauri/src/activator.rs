@@ -98,13 +98,9 @@ struct ActivationState {
 /// and enforces temporal constraints defined by [`ACTIVATION_WINDOW`].
 fn evaluate_activation(state: &mut ActivationState, is_press: bool) -> bool {
     if is_press && !state.is_pressed {
-        // Only enforce cooldown on the first press of a sequence — the
-        // second press (is_pressed already true) is part of the same
-        // activation attempt and must not be blocked by cooldown.
         if let Some(last_act) = state.last_activation {
             let now = Instant::now();
             if now.duration_since(last_act) < ACTIVATION_COOLDOWN {
-                state.is_pressed = true;
                 return false;
             }
         }
