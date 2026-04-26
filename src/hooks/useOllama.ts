@@ -184,7 +184,9 @@ export function useOllama(
   const reset = useCallback(() => {
     setMessages([]);
     setIsGenerating(false);
-    void invoke('reset_conversation');
+    void invoke('reset_conversation').catch(() => {
+      // Ignore errors — the backend will reject if there's nothing to reset.
+    });
   }, []);
 
   /**
