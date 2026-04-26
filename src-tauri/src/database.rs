@@ -195,7 +195,7 @@ pub fn create_conversation(
     model: &str,
 ) -> SqlResult<String> {
     let id = uuid::Uuid::new_v4().to_string();
-    let now = now_millis();
+    let now = now_millis()?;
     conn.execute(
         "INSERT INTO conversations (id, title, model, created_at, updated_at)
          VALUES (?1, ?2, ?3, ?4, ?5)",
@@ -249,7 +249,7 @@ pub fn update_conversation_title(
 ) -> SqlResult<()> {
     conn.execute(
         "UPDATE conversations SET title = ?1, updated_at = ?2 WHERE id = ?3",
-        params![title, now_millis(), conversation_id],
+        params![title, now_millis()?, conversation_id],
     )?;
     Ok(())
 }
@@ -278,7 +278,7 @@ pub fn insert_message(
     thinking_content: Option<&str>,
 ) -> SqlResult<String> {
     let id = uuid::Uuid::new_v4().to_string();
-    let now = now_millis();
+    let now = now_millis()?;
     conn.execute(
         "INSERT INTO messages (id, conversation_id, role, content, quoted_text, image_paths, thinking_content, created_at)
          VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
@@ -299,7 +299,7 @@ pub fn insert_messages_batch(
     messages: &[MessageBatchRow],
 ) -> SqlResult<()> {
     let tx = conn.unchecked_transaction()?;
-    let now = now_millis();
+    let now = now_millis()?;
     {
         let mut stmt = tx.prepare(
             "INSERT INTO messages (id, conversation_id, role, content, quoted_text, image_paths, thinking_content, created_at)
@@ -380,11 +380,14 @@ fn map_summary(row: &rusqlite::Row) -> SqlResult<ConversationSummary> {
 }
 
 /// Current UTC time in milliseconds since the Unix epoch.
-fn now_millis() -> i64 {
+///
+/// Returns `Ok(i64)` on success, or a descriptive error if the system
+/// clock is set before the Unix epoch (extremely rare).
+fn now_millis() -> Result<i64, String> {
     std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
-        .expect("system clock before Unix epoch")
-        .as_millis() as i64
+        .map(|d| d.as_millis() as i64)
+        .map_err(|e| format!("system clock is set before the Unix epoch: {e}"))
 }
 
 // ─── Tests ──────────────────────────────────────────────────────────────────
@@ -606,7 +609,7 @@ mod tests {
 
     #[test]
     fn now_millis_returns_reasonable_value() {
-        let ms = now_millis();
+        let ms = now_millis().unwrap();
         // Should be after 2024-01-01 in milliseconds.
         assert!(ms > 1_704_067_200_000);
     }
