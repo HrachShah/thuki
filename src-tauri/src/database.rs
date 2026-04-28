@@ -299,7 +299,6 @@ pub fn insert_messages_batch(
     messages: &[MessageBatchRow],
 ) -> SqlResult<()> {
     let tx = conn.unchecked_transaction()?;
-    let now = now_millis();
     {
         let mut stmt = tx.prepare(
             "INSERT INTO messages (id, conversation_id, role, content, quoted_text, image_paths, thinking_content, created_at)
@@ -307,6 +306,7 @@ pub fn insert_messages_batch(
         )?;
         for (role, content, quoted_text, image_paths, thinking_content) in messages {
             let id = uuid::Uuid::new_v4().to_string();
+            let now = now_millis();
             stmt.execute(params![
                 id,
                 conversation_id,
@@ -319,6 +319,7 @@ pub fn insert_messages_batch(
             ])?;
         }
     }
+    let now = now_millis();
     tx.execute(
         "UPDATE conversations SET updated_at = ?1 WHERE id = ?2",
         params![now, conversation_id],
