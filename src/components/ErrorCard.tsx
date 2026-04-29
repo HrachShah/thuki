@@ -1,3 +1,5 @@
+import React from 'react';
+
 export type OllamaErrorKind = 'NotRunning' | 'ModelNotFound' | 'Other';
 
 interface ErrorCardProps {
