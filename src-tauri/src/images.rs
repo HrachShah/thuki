@@ -98,18 +98,22 @@ pub fn save_image(base_dir: &Path, image_data: &[u8]) -> Result<String, String> 
 /// Returns an error if the path escapes the images directory or the file
 /// cannot be removed. Silently succeeds if the file does not exist (idempotent).
 pub fn remove_image(base_dir: &Path, path: &str) -> Result<(), String> {
+    // Resolve both paths before any I/O. Checking the root first means
+    // we reject traversal attempts even when the target file does not exist,
+    // which is consistent with the error-then-silent-success policy.
     let p = Path::new(path);
-    if !p.exists() {
-        return Ok(());
-    }
+    let root = images_root(base_dir);
     let canonical = p
         .canonicalize()
         .map_err(err("failed to resolve image path"))?;
-    let root = images_root(base_dir)
+    let root_canonical = root
         .canonicalize()
         .map_err(err("failed to resolve images root"))?;
-    if !canonical.starts_with(&root) {
+    if !canonical.starts_with(&root_canonical) {
         return Err("path is outside the images directory".to_string());
+    }
+    if !p.exists() {
+        return Ok(());
     }
     std::fs::remove_file(p).map_err(err("failed to remove image"))?;
     Ok(())
@@ -473,6 +477,22 @@ mod tests {
     #[test]
     fn max_images_per_message_is_four() {
         assert_eq!(MAX_IMAGES_PER_MESSAGE, 4);
+    }
+
+    #[test]
+    fn remove_image_rejects_traversal_on_missing_target() {
+        // Even when the target file does not exist, a traversal path is still
+        // rejected — not silently allowed via the `exists()` shortcut.
+        let base = temp_dir();
+        // Ensure the images root exists so canonicalize doesn't fail on it.
+        fs::create_dir_all(images_root(&base)).unwrap();
+
+        let traversal = base.join("..").join("..").join("etc").join("passwd");
+        let result = remove_image(&base, traversal.to_str().unwrap());
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("outside the images directory"));
+
+        fs::remove_dir_all(&base).unwrap();
     }
 
     #[test]
