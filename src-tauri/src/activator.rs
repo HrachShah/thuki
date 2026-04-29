@@ -220,10 +220,13 @@ where
             TapExitReason::CreationFailed => {
                 permission_failures += 1;
                 if permission_failures >= MAX_PERMISSION_ATTEMPTS {
-                    eprintln!(
+                    let msg = if permission_failures == MAX_PERMISSION_ATTEMPTS {
                         "thuki: [error] activation listener failed after \
                          maximum retries; check system permissions."
-                    );
+                    } else {
+                        "thuki: [error] activation listener ran out of permission attempts."
+                    };
+                    eprintln!("{}", msg);
                     return;
                 }
                 eprintln!(
