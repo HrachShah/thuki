@@ -176,6 +176,9 @@ mod macos {
             }
         }
         // Always restore the original clipboard regardless of outcome.
+        // If the copy command silently failed (focused app doesn't support Cmd+C),
+        // after == before, and we must restore anyway to avoid losing the user's
+        // original clipboard content permanently.
         if after != before {
             write_clipboard(&before);
         }
