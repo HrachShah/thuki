@@ -18,7 +18,7 @@ export function formatRelativeTime(
   const diffHr = Math.floor(diffMin / 60);
   if (diffHr < 24) return `${diffHr}h ago`;
 
-  const diffDay = Math.floor(diffHr / 24);
+  const diffDay = Math.floor(diffSec / 86400);
   if (diffDay < 14) return `${diffDay}d ago`;
 
   const diffWeek = Math.floor(diffDay / 7);
