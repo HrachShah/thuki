@@ -19,7 +19,7 @@ export function formatQuotedText(
 
   for (const line of lines) {
     // Stop if we've hit the line limit
-    if (result.length >= maxLines) {
+    if (result.length == maxLines) {
       result.push('...');
       break;
     }
@@ -32,6 +32,9 @@ export function formatQuotedText(
     if (totalChars + trimmed.length > maxChars) {
       const remaining = maxChars - totalChars;
       result.push(trimmed.substring(0, remaining) + '...');
+      break;
+    } else if (totalChars + trimmed.length == maxChars) {
+      result.push(trimmed);
       break;
     }
 
