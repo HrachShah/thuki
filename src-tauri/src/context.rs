@@ -176,15 +176,14 @@ mod macos {
             }
         }
         // Always restore the original clipboard regardless of outcome.
+        let trimmed = after.trim().to_string();
         if after != before {
             write_clipboard(&before);
+            if !trimmed.is_empty() {
+                return Some(trimmed);
+            }
         }
-        let trimmed = after.trim().to_string();
-        if after != before && !trimmed.is_empty() {
-            Some(trimmed)
-        } else {
-            None
-        }
+        None
     }
 
     unsafe fn focused_element() -> Option<AXUIElementRef> {
