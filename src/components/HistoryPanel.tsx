@@ -143,6 +143,14 @@ export function HistoryPanel({
     void fetchList();
   }, [fetchList]);
 
+  // Cancel any pending debounce when fetchList changes (prevents stale callbacks).
+  useEffect(() => {
+    if (debounceRef.current !== null) {
+      clearTimeout(debounceRef.current);
+      debounceRef.current = null;
+    }
+  }, [fetchList]);
+
   // Debounced search: fires 200 ms after the user stops typing.
   const handleSearchChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -153,6 +161,7 @@ export function HistoryPanel({
         clearTimeout(debounceRef.current);
       }
       debounceRef.current = setTimeout(() => {
+        debounceRef.current = null;
         void fetchList(value || undefined);
       }, SEARCH_DEBOUNCE_MS);
     },
