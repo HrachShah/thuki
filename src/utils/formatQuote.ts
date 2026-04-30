@@ -18,15 +18,15 @@ export function formatQuotedText(
   let totalChars = 0;
 
   for (const line of lines) {
-    // Stop if we've hit the line limit
+    const trimmed = line.trim();
+    // Skip empty lines but don't count them against the line limit
+    if (!trimmed) continue;
+
+    // Stop if we've hit the line limit before adding this line
     if (result.length >= maxLines) {
       result.push('...');
       break;
     }
-
-    const trimmed = line.trim();
-    // Skip empty lines but don't count them against the line limit
-    if (!trimmed) continue;
 
     // If adding this line would exceed char limit, truncate and stop
     if (totalChars + trimmed.length > maxChars) {
