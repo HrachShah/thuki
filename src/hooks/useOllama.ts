@@ -159,15 +159,8 @@ export function useOllama(
           onEvent: channel,
         });
       } catch {
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: crypto.randomUUID(),
-            role: 'assistant',
-            content: 'Something went wrong\nCould not reach Ollama.',
-            errorKind: 'Other' as const,
-          },
-        ]);
+        // Remove the empty assistant placeholder since no message was generated.
+        setMessages((prev) => prev.filter((m) => m.id !== assistantId));
         setIsGenerating(false);
       }
     },
