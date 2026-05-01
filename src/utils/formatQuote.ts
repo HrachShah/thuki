@@ -31,7 +31,12 @@ export function formatQuotedText(
     // If adding this line would exceed char limit, truncate and stop
     if (totalChars + trimmed.length > maxChars) {
       const remaining = maxChars - totalChars;
-      result.push(trimmed.substring(0, remaining) + '...');
+      if (remaining <= 0) {
+        // Single line is longer than entire budget — add what fits and stop
+        result.push(trimmed.substring(0, maxChars) + '...');
+      } else {
+        result.push(trimmed.substring(0, remaining) + '...');
+      }
       break;
     }
 
