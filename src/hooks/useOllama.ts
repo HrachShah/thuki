@@ -158,7 +158,9 @@ export function useOllama(
           think: think ?? false,
           onEvent: channel,
         });
-      } catch {
+      } catch (err) {
+        // Log the error for debugging, then surface a user-facing message.
+        console.error('ask_ollama invocation failed:', err);
         setMessages((prev) => [
           ...prev,
           {
@@ -169,6 +171,8 @@ export function useOllama(
           },
         ]);
         setIsGenerating(false);
+      } finally {
+        channel.close();
       }
     },
     [isGenerating, onTurnComplete],
