@@ -27,15 +27,21 @@ function toPayload(msg: Message): SaveMessagePayload {
  * frontend `Message`, preserving optional `quotedText`.
  */
 function fromPersisted(msg: PersistedMessage): Message {
-  const imagePaths = msg.image_paths
-    ? (JSON.parse(msg.image_paths) as string[])
-    : undefined;
+  let imagePaths: string[] | undefined;
+  if (msg.image_paths) {
+    try {
+      const parsed = JSON.parse(msg.image_paths) as string[];
+      imagePaths = parsed && parsed.length > 0 ? parsed : undefined;
+    } catch {
+      imagePaths = undefined;
+    }
+  }
   return {
     id: msg.id,
     role: msg.role as 'user' | 'assistant',
     content: msg.content,
     quotedText: msg.quoted_text ?? undefined,
-    imagePaths: imagePaths && imagePaths.length > 0 ? imagePaths : undefined,
+    imagePaths,
     thinkingContent: msg.thinking_content ?? undefined,
   };
 }
