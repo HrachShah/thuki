@@ -1214,9 +1214,11 @@ function App() {
 
   /** Fetches model configuration from the backend once at mount. */
   useEffect(() => {
-    void invoke<{ active: string; all: string[] }>('get_model_config').then(
-      setModelConfig,
-    );
+    void invoke<{ active: string; all: string[] }>('get_model_config')
+      .then(setModelConfig)
+      .catch(() => {
+        /* ignore — App remains functional with DEFAULT_MODEL_FALLBACK */
+      });
   }, []);
 
   /**
