@@ -364,14 +364,11 @@ export function AskBarView({
     (trigger: string) => {
       setDismissedQuery('');
       setHighlightedIndex(0);
-      // Replace the partial slash word at the end with the completed trigger
-      const beforeSlash = rawQuery.slice(
-        0,
-        rawQuery.length - lastSlashWord.length,
-      );
+      const match = rawQuery.match(/(?:^|\s)(\/\S*)$/);
+      const beforeSlash = match ? rawQuery.slice(0, match.index) : '';
       setQuery(beforeSlash + trigger + ' ');
     },
-    [setQuery, rawQuery, lastSlashWord],
+    [setQuery, rawQuery],
   );
 
   /**
@@ -447,17 +444,14 @@ export function AskBarView({
             // Exact match: fall through to normal submit below.
           }
           // No match, empty list, or exact trigger already typed: submit.
+          e.preventDefault();
+          onSubmit();
         }
         if (e.key === 'Escape') {
           e.preventDefault();
           setDismissedQuery(lastSlashWord);
           return;
         }
-      }
-
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        onSubmit();
       }
     },
     [
