@@ -27,9 +27,15 @@ function toPayload(msg: Message): SaveMessagePayload {
  * frontend `Message`, preserving optional `quotedText`.
  */
 function fromPersisted(msg: PersistedMessage): Message {
-  const imagePaths = msg.image_paths
-    ? (JSON.parse(msg.image_paths) as string[])
-    : undefined;
+  let imagePaths: string[] | undefined;
+  if (msg.image_paths) {
+    try {
+      imagePaths = JSON.parse(msg.image_paths) as string[];
+    } catch {
+      console.warn("load_conversation: failed to parse image_paths, skipping:", msg.image_paths);
+      imagePaths = undefined;
+    }
+  }
   return {
     id: msg.id,
     role: msg.role as 'user' | 'assistant',
