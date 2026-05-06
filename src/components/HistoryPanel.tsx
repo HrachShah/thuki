@@ -131,7 +131,7 @@ export function HistoryPanel({
       try {
         const results = await listConversations(term);
         setConversations(results);
-      } catch {
+      } catch (err) {
         setLoadError(true);
       }
     },
@@ -215,7 +215,7 @@ export function HistoryPanel({
       setConversations((prev) => prev.filter((c) => c.id !== id));
       try {
         await onDeleteConversation(id);
-      } catch {
+      } catch (err) {
         // Backend rejected — restore the item in its original sort position.
         /* v8 ignore start */
         if (snapshot !== null) {
