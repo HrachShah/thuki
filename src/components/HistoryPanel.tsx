@@ -131,7 +131,7 @@ export function HistoryPanel({
       try {
         const results = await listConversations(term);
         setConversations(results);
-      } catch {
+      } catch (e: Error) {
         setLoadError(true);
       }
     },
