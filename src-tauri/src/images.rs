@@ -105,10 +105,13 @@ pub fn remove_image(base_dir: &Path, path: &str) -> Result<(), String> {
     let canonical = p
         .canonicalize()
         .map_err(err("failed to resolve image path"))?;
-    let root = images_root(base_dir)
-        .canonicalize()
-        .map_err(err("failed to resolve images root"))?;
-    if !canonical.starts_with(&root) {
+    let root = images_root(base_dir);
+    if !root.exists() {
+        // No images directory means no images to remove.
+        return Ok(());
+    }
+    let canonical_root = root.canonicalize().map_err(err("failed to resolve images root"))?;
+    if !canonical.starts_with(&canonical_root) {
         return Err("path is outside the images directory".to_string());
     }
     std::fs::remove_file(p).map_err(err("failed to remove image"))?;
