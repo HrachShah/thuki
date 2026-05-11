@@ -158,7 +158,7 @@ export function useOllama(
           think: think ?? false,
           onEvent: channel,
         });
-      } catch (err) {
+      } catch (err: unknown) {
         // Log the error for debugging, then surface a user-facing message.
         console.error('ask_ollama invocation failed:', err);
         setMessages((prev) => [
