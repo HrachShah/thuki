@@ -581,7 +581,7 @@ function App() {
       try {
         const loaded = await loadConversation(id);
         loadMessages(loaded);
-      } catch {
+      } catch (err: Error) {
         // Load failed — current session is preserved intact.
       } finally {
         setIsHistoryOpen(false);
@@ -602,14 +602,14 @@ function App() {
     async (id: string) => {
       try {
         await save(messages, modelConfig?.active ?? DEFAULT_MODEL_FALLBACK);
-      } catch {
+      } catch (err: Error) {
         // Save failed — abort to avoid leaving the current session unprotected.
         return;
       }
       try {
         const loaded = await loadConversation(id);
         loadMessages(loaded);
-      } catch {
+      } catch (err: Error) {
         // Load failed — save already committed; dismiss panel, keep current view.
       } finally {
         setIsHistoryOpen(false);
@@ -674,7 +674,7 @@ function App() {
   const handleSaveAndNew = useCallback(async () => {
     try {
       await save(messages, modelConfig?.active ?? DEFAULT_MODEL_FALLBACK);
-    } catch {
+    } catch (err: Error) {
       return;
     }
     resetForNewConversation();
