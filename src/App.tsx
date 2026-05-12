@@ -563,7 +563,7 @@ function App() {
       } else {
         await save(messages, modelConfig?.active ?? DEFAULT_MODEL_FALLBACK);
       }
-    } catch {
+    } catch (err: TypeError) {
       // State stays unchanged on failure; feedback is implicit in the icon.
     }
   }, [isSaved, unsave, save, messages, modelConfig]);

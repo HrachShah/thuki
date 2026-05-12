@@ -224,7 +224,7 @@ export function HistoryPanel({
       setConversations((prev) => prev.filter((c) => c.id !== id));
       try {
         await onDeleteConversation(id);
-      } catch {
+      } catch (err: Error) {
         // Backend rejected — restore the item in its original sort position.
         /* v8 ignore start */
         if (snapshot !== null) {
