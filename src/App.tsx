@@ -563,7 +563,7 @@ function App() {
       } else {
         await save(messages, modelConfig?.active ?? DEFAULT_MODEL_FALLBACK);
       }
-    } catch (err) {
+    } catch (err: unknown) {
       // State stays unchanged on failure; feedback is implicit in the icon.
     }
   }, [isSaved, unsave, save, messages, modelConfig]);
@@ -581,7 +581,7 @@ function App() {
       try {
         const loaded = await loadConversation(id);
         loadMessages(loaded);
-      } catch (err) {
+      } catch (err: unknown) {
         // Load failed — current session is preserved intact.
       } finally {
         setIsHistoryOpen(false);
@@ -602,14 +602,14 @@ function App() {
     async (id: string) => {
       try {
         await save(messages, modelConfig?.active ?? DEFAULT_MODEL_FALLBACK);
-      } catch (err) {
+      } catch (err: unknown) {
         // Save failed — abort to avoid leaving the current session unprotected.
         return;
       }
       try {
         const loaded = await loadConversation(id);
         loadMessages(loaded);
-      } catch (err) {
+      } catch (err: unknown) {
         // Load failed — save already committed; dismiss panel, keep current view.
       } finally {
         setIsHistoryOpen(false);
@@ -674,7 +674,7 @@ function App() {
   const handleSaveAndNew = useCallback(async () => {
     try {
       await save(messages, modelConfig?.active ?? DEFAULT_MODEL_FALLBACK);
-    } catch (err) {
+    } catch (err: unknown) {
       return;
     }
     resetForNewConversation();
@@ -913,7 +913,7 @@ function App() {
       let screenshotPath: string;
       try {
         screenshotPath = await invoke<string>('capture_full_screen_command');
-      } catch (e) {
+      } catch (e: unknown) {
         screenCapturePendingRef.current = false;
         screenCaptureInputSnapshotRef.current = null;
         // Capture failed: restore input state so the user can retry or edit.
