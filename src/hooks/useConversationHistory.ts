@@ -28,12 +28,15 @@ function toPayload(msg: Message): SaveMessagePayload {
  */
 function fromPersisted(msg: PersistedMessage): Message {
   let imagePaths: string[] | undefined;
-  try {
-    imagePaths = msg.image_paths
-      ? (JSON.parse(msg.image_paths) as string[])
-      : undefined;
-  } catch {
-    imagePaths = undefined;
+  if (msg.image_paths) {
+    try {
+      imagePaths = JSON.parse(msg.image_paths) as string[];
+    } catch (err: unknown) {
+      // JSON.parse raises SyntaxError for malformed input; re-throw anything else
+      if (!(err instanceof SyntaxError)) throw err;
+      console.warn("load_conversation: failed to parse image_paths, skipping:", msg.image_paths);
+      imagePaths = undefined;
+    }
   }
   return {
     id: msg.id,
