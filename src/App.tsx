@@ -719,7 +719,7 @@ function App() {
                 ),
               );
             })
-            .catch(() => {
+            .catch((err: unknown) => {
               setAttachedImages((prev) => {
                 for (const img of prev) {
                   if (img.id === imageId) URL.revokeObjectURL(img.blobUrl);
