@@ -398,7 +398,7 @@ pub async fn ask_ollama(
     // after a response (including partial/cancelled) to prevent orphaned
     // messages on errors.
     let (epoch_at_start, messages) = {
-        let conv = history.messages.lock().unwrap();
+        let conv = history.messages.lock().map_err(|e| e.to_string())?;
         let epoch = history.epoch.load(Ordering::SeqCst);
         let mut msgs = vec![ChatMessage {
             role: "system".to_string(),
