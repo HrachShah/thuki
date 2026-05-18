@@ -464,7 +464,9 @@ pub async fn cancel_generation(generation: State<'_, GenerationState>) -> Result
 #[cfg_attr(not(coverage), tauri::command)]
 pub fn reset_conversation(history: State<'_, ConversationHistory>) {
     history.epoch.fetch_add(1, Ordering::SeqCst);
-    history.messages.lock().unwrap().clear();
+    if let Ok(mut msgs) = history.messages.lock().map_err(|e| e.to_string()) {
+        msgs.clear();
+    }
 }
 
 #[cfg(test)]
