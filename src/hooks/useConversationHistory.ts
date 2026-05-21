@@ -27,9 +27,14 @@ function toPayload(msg: Message): SaveMessagePayload {
  * frontend `Message`, preserving optional `quotedText`.
  */
 function fromPersisted(msg: PersistedMessage): Message {
-  const imagePaths = msg.image_paths
-    ? (JSON.parse(msg.image_paths) as string[])
-    : undefined;
+  let imagePaths: string[] | undefined;
+  if (msg.image_paths) {
+    try {
+      imagePaths = JSON.parse(msg.image_paths) as string[];
+    } catch {
+      imagePaths = undefined;
+    }
+  }
   return {
     id: msg.id,
     role: msg.role as 'user' | 'assistant',
