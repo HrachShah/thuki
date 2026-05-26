@@ -158,7 +158,7 @@ export function useOllama(
           think: think ?? false,
           onEvent: channel,
         });
-      } catch {
+      } catch (e: unknown) {
         setMessages((prev) => [
           ...prev,
           {
