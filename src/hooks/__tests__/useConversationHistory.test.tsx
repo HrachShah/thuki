@@ -306,6 +306,82 @@ describe('useConversationHistory', () => {
     expect(loaded[1].imagePaths).toBeUndefined();
   });
 
+  it('loadConversation() drops imagePaths when stored value is malformed JSON', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    invoke.mockResolvedValueOnce([
+      {
+        id: 'm-bad',
+        role: 'user',
+        content: 'corrupt row',
+        quoted_text: null,
+        image_paths: 'not-valid-json{',
+        thinking_content: null,
+        created_at: 1,
+      },
+    ]);
+
+    const { result } = renderHook(() => useConversationHistory());
+    let loaded: Message[] = [];
+    await act(async () => {
+      loaded = await result.current.loadConversation('conv-bad-json');
+    });
+
+    expect(loaded[0].imagePaths).toBeUndefined();
+    expect(loaded[0].content).toBe('corrupt row');
+    expect(warnSpy).toHaveBeenCalled();
+    warnSpy.mockRestore();
+  });
+
+  it('loadConversation() drops imagePaths when JSON shape is not string[]', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    invoke.mockResolvedValueOnce([
+      {
+        id: 'm-wrong-shape',
+        role: 'user',
+        content: 'wrong shape row',
+        quoted_text: null,
+        image_paths: '{"not":"an array"}',
+        thinking_content: null,
+        created_at: 1,
+      },
+    ]);
+
+    const { result } = renderHook(() => useConversationHistory());
+    let loaded: Message[] = [];
+    await act(async () => {
+      loaded = await result.current.loadConversation('conv-wrong-shape');
+    });
+
+    expect(loaded[0].imagePaths).toBeUndefined();
+    expect(warnSpy).toHaveBeenCalled();
+    warnSpy.mockRestore();
+  });
+
+  it('loadConversation() drops imagePaths when array contains non-string entries', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    invoke.mockResolvedValueOnce([
+      {
+        id: 'm-mixed',
+        role: 'user',
+        content: 'mixed shape row',
+        quoted_text: null,
+        image_paths: '["/images/a.jpg", 42]',
+        thinking_content: null,
+        created_at: 1,
+      },
+    ]);
+
+    const { result } = renderHook(() => useConversationHistory());
+    let loaded: Message[] = [];
+    await act(async () => {
+      loaded = await result.current.loadConversation('conv-mixed');
+    });
+
+    expect(loaded[0].imagePaths).toBeUndefined();
+    expect(warnSpy).toHaveBeenCalled();
+    warnSpy.mockRestore();
+  });
+
   it('loadConversation() sets conversationId to the loaded id', async () => {
     invoke.mockResolvedValueOnce([]);
 

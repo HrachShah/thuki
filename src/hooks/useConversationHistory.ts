@@ -27,9 +27,33 @@ function toPayload(msg: Message): SaveMessagePayload {
  * frontend `Message`, preserving optional `quotedText`.
  */
 function fromPersisted(msg: PersistedMessage): Message {
-  const imagePaths = msg.image_paths
-    ? (JSON.parse(msg.image_paths) as string[])
-    : undefined;
+  let imagePaths: string[] | undefined;
+  if (msg.image_paths) {
+    try {
+      const parsed: unknown = JSON.parse(msg.image_paths);
+      if (
+        Array.isArray(parsed) &&
+        parsed.every((p): p is string => typeof p === 'string')
+      ) {
+        imagePaths = parsed;
+      } else {
+        // Malformed shape: a JSON object, number, or array containing non-strings
+        // is not a valid image_paths value. Drop the field rather than propagate
+        // bad data into the UI; the message still loads with text/quoted fields.
+        console.warn(
+          `Discarding image_paths for message ${msg.id}: expected JSON string[], got ${typeof parsed}`,
+        );
+      }
+    } catch (e: unknown) {
+      // Stored value is not valid JSON. Likely schema drift from a previous app
+      // version or manual database tampering; surface the parse error so the
+      // user can debug and fall back to undefined to keep the message loadable.
+      console.warn(
+        `Failed to parse image_paths JSON for message ${msg.id}:`,
+        e instanceof Error ? e.message : String(e),
+      );
+    }
+  }
   return {
     id: msg.id,
     role: msg.role as 'user' | 'assistant',
