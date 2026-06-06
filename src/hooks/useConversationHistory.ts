@@ -27,9 +27,20 @@ function toPayload(msg: Message): SaveMessagePayload {
  * frontend `Message`, preserving optional `quotedText`.
  */
 function fromPersisted(msg: PersistedMessage): Message {
-  const imagePaths = msg.image_paths
-    ? (JSON.parse(msg.image_paths) as string[])
-    : undefined;
+  // The SQLite column may be a JSON array of paths or null; a malformed value
+  // (truncated row, schema drift, corrupted blob) used to throw a SyntaxError
+  // out of JSON.parse and crash the entire loadConversation() call. Fall back
+  // to an empty array so the message still loads — the user just won't see
+  // images for that row.
+  let imagePaths: string[] | undefined;
+  if (msg.image_paths) {
+    try {
+      const parsed = JSON.parse(msg.image_paths);
+      imagePaths = Array.isArray(parsed) ? (parsed as string[]) : [];
+    } catch {
+      imagePaths = [];
+    }
+  }
   return {
     id: msg.id,
     role: msg.role as 'user' | 'assistant',

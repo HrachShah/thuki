@@ -319,6 +319,70 @@ describe('useConversationHistory', () => {
     expect(result.current.isSaved).toBe(true);
   });
 
+  it('loadConversation() survives a malformed image_paths JSON column', async () => {
+    // Regression: JSON.parse used to throw on a truncated SQLite blob and
+    // crash the whole loadConversation() call. The hook should now treat the
+    // row as image-less and continue mapping the remaining messages.
+    invoke.mockResolvedValueOnce([
+      {
+        id: 'm1',
+        role: 'user',
+        content: 'Corrupted image paths',
+        quoted_text: null,
+        image_paths: '["/images/a.jpg",/images/b.jpg', // truncated JSON
+        thinking_content: null,
+        created_at: 1,
+      },
+      {
+        id: 'm2',
+        role: 'assistant',
+        content: 'I see',
+        quoted_text: null,
+        image_paths: null,
+        thinking_content: null,
+        created_at: 2,
+      },
+    ]);
+
+    const { result } = renderHook(() => useConversationHistory());
+    let loaded: Message[] = [];
+
+    await act(async () => {
+      loaded = await result.current.loadConversation('conv-corrupt');
+    });
+
+    expect(loaded).toHaveLength(2);
+    expect(loaded[0].imagePaths).toBeUndefined();
+    expect(loaded[0].content).toBe('Corrupted image paths');
+    expect(loaded[1].imagePaths).toBeUndefined();
+  });
+
+  it('loadConversation() coerces non-array image_paths to no images', async () => {
+    // Defensive: a schema drift that puts a string or object in image_paths
+    // should not crash — non-arrays are treated as image-less.
+    invoke.mockResolvedValueOnce([
+      {
+        id: 'm1',
+        role: 'user',
+        content: 'Strange shapes',
+        quoted_text: null,
+        image_paths: '{"oops":"object"}',
+        thinking_content: null,
+        created_at: 1,
+      },
+    ]);
+
+    const { result } = renderHook(() => useConversationHistory());
+    let loaded: Message[] = [];
+
+    await act(async () => {
+      loaded = await result.current.loadConversation('conv-shape');
+    });
+
+    expect(loaded).toHaveLength(1);
+    expect(loaded[0].imagePaths).toBeUndefined();
+  });
+
   it('deleteConversation() invokes delete_conversation with correct id', async () => {
     invoke.mockResolvedValue(undefined);
 
