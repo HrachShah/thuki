@@ -476,7 +476,7 @@ describe('useOllama', () => {
       expect(errorMsg?.content).toBe('Something went wrong\nHTTP 500');
     });
 
-    it('invoke rejection creates assistant message with Other errorKind', async () => {
+    it('invoke rejection replaces the empty assistant placeholder with an error message', async () => {
       invoke.mockRejectedValueOnce(new Error('network error'));
 
       const { result } = renderHook(() => useOllama());
@@ -485,11 +485,20 @@ describe('useOllama', () => {
         await result.current.ask('test');
       });
 
-      const errorMsg = result.current.messages.find(
-        (m) => m.errorKind === 'Other',
+      // The user message is still there
+      const userMsgs = result.current.messages.filter((m) => m.role === 'user');
+      expect(userMsgs).toHaveLength(1);
+      expect(userMsgs[0].content).toBe('test');
+
+      // Exactly ONE assistant message is in the list — the empty placeholder
+      // was replaced with the error message, not appended alongside it.
+      const assistantMsgs = result.current.messages.filter(
+        (m) => m.role === 'assistant',
       );
-      expect(errorMsg?.errorKind).toBe('Other');
-      expect(errorMsg?.content).toBeTruthy();
+      expect(assistantMsgs).toHaveLength(1);
+      expect(assistantMsgs[0].errorKind).toBe('Other');
+      expect(assistantMsgs[0].content).toBeTruthy();
+      expect(assistantMsgs[0].content).toContain('Something went wrong');
     });
   });
 
