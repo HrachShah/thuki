@@ -22,14 +22,38 @@ function toPayload(msg: Message): SaveMessagePayload {
   };
 }
 
+function parseImagePaths(raw: string | null): string[] | undefined {
+  if (!raw) return undefined;
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) {
+      console.warn(
+        'fromPersisted: image_paths was valid JSON but not an array, dropping',
+      );
+      return undefined;
+    }
+    const paths: string[] = [];
+    for (const item of parsed) {
+      if (typeof item === 'string') {
+        paths.push(item);
+      }
+    }
+    return paths.length > 0 ? paths : undefined;
+  } catch (err) {
+    console.warn(
+      'fromPersisted: failed to parse image_paths JSON, dropping',
+      err,
+    );
+    return undefined;
+  }
+}
+
 /**
  * Maps a `PersistedMessage` returned by `load_conversation` back to a
  * frontend `Message`, preserving optional `quotedText`.
  */
 function fromPersisted(msg: PersistedMessage): Message {
-  const imagePaths = msg.image_paths
-    ? (JSON.parse(msg.image_paths) as string[])
-    : undefined;
+  const imagePaths = parseImagePaths(msg.image_paths);
   return {
     id: msg.id,
     role: msg.role as 'user' | 'assistant',

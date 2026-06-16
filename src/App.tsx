@@ -913,7 +913,7 @@ function App() {
       let screenshotPath: string;
       try {
         screenshotPath = await invoke<string>('capture_full_screen_command');
-      } catch (e) {
+      } catch (e: unknown) {
         screenCapturePendingRef.current = false;
         screenCaptureInputSnapshotRef.current = null;
         // Capture failed: restore input state so the user can retry or edit.

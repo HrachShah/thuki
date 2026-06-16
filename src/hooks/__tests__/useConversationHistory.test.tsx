@@ -306,6 +306,77 @@ describe('useConversationHistory', () => {
     expect(loaded[1].imagePaths).toBeUndefined();
   });
 
+  it('loadConversation() returns undefined imagePaths when stored JSON is corrupt', async () => {
+    invoke.mockResolvedValueOnce([
+      {
+        id: 'm1',
+        role: 'user',
+        content: 'Migrated from old format',
+        quoted_text: null,
+        image_paths: '{not valid json',
+        thinking_content: null,
+        created_at: 1,
+      },
+    ]);
+
+    const { result } = renderHook(() => useConversationHistory());
+
+    let loaded: Message[] = [];
+    await act(async () => {
+      loaded = await result.current.loadConversation('conv-corrupt');
+    });
+
+    expect(loaded[0].id).toBe('m1');
+    expect(loaded[0].content).toBe('Migrated from old format');
+    expect(loaded[0].imagePaths).toBeUndefined();
+  });
+
+  it('loadConversation() returns undefined imagePaths when JSON is not an array', async () => {
+    invoke.mockResolvedValueOnce([
+      {
+        id: 'm1',
+        role: 'user',
+        content: 'Image stored as object by older build',
+        quoted_text: null,
+        image_paths: '{"path":"/img/a.jpg"}',
+        thinking_content: null,
+        created_at: 1,
+      },
+    ]);
+
+    const { result } = renderHook(() => useConversationHistory());
+
+    let loaded: Message[] = [];
+    await act(async () => {
+      loaded = await result.current.loadConversation('conv-object');
+    });
+
+    expect(loaded[0].imagePaths).toBeUndefined();
+  });
+
+  it('loadConversation() returns undefined imagePaths when JSON is an empty array', async () => {
+    invoke.mockResolvedValueOnce([
+      {
+        id: 'm1',
+        role: 'user',
+        content: 'No images attached',
+        quoted_text: null,
+        image_paths: '[]',
+        thinking_content: null,
+        created_at: 1,
+      },
+    ]);
+
+    const { result } = renderHook(() => useConversationHistory());
+
+    let loaded: Message[] = [];
+    await act(async () => {
+      loaded = await result.current.loadConversation('conv-empty');
+    });
+
+    expect(loaded[0].imagePaths).toBeUndefined();
+  });
+
   it('loadConversation() sets conversationId to the loaded id', async () => {
     invoke.mockResolvedValueOnce([]);
 
