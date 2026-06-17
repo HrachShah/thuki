@@ -27,9 +27,24 @@ function toPayload(msg: Message): SaveMessagePayload {
  * frontend `Message`, preserving optional `quotedText`.
  */
 function fromPersisted(msg: PersistedMessage): Message {
-  const imagePaths = msg.image_paths
-    ? (JSON.parse(msg.image_paths) as string[])
-    : undefined;
+  // A persisted conversation whose image_paths column was written by an older
+  // backend, hand-edited in SQLite, or corrupted by a partial write comes back
+  // as a non-empty string that is not valid JSON. JSON.parse on that string
+  // throws SyntaxError, which propagates out of load_conversation and turns
+  // the user's whole conversation history into an unopenable error dialog.
+  // Treat any malformed value as 'no image paths' so the rest of the message
+  // (id, role, content, quoted_text, thinking_content) still loads.
+  let imagePaths: string[] | undefined = undefined;
+  if (msg.image_paths) {
+    try {
+      const parsed = JSON.parse(msg.image_paths);
+      if (Array.isArray(parsed) && parsed.every((p) => typeof p === 'string')) {
+        imagePaths = parsed as string[];
+      }
+    } catch {
+      // Fall through to undefined.
+    }
+  }
   return {
     id: msg.id,
     role: msg.role as 'user' | 'assistant',

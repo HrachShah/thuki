@@ -306,6 +306,55 @@ describe('useConversationHistory', () => {
     expect(loaded[1].imagePaths).toBeUndefined();
   });
 
+  it('loadConversation() tolerates malformed image_paths JSON', async () => {
+    invoke.mockResolvedValueOnce([
+      {
+        id: 'm1',
+        role: 'user',
+        content: 'Look at this',
+        quoted_text: null,
+        image_paths: 'not-valid-json{',
+        thinking_content: null,
+        created_at: 1,
+      },
+      {
+        id: 'm2',
+        role: 'assistant',
+        content: 'I see',
+        quoted_text: null,
+        image_paths: '["oops", 42]',
+        thinking_content: null,
+        created_at: 2,
+      },
+      {
+        id: 'm3',
+        role: 'user',
+        content: 'No images',
+        quoted_text: null,
+        image_paths: null,
+        thinking_content: null,
+        created_at: 3,
+      },
+    ]);
+
+    const { result } = renderHook(() => useConversationHistory());
+
+    let loaded: Message[] = [];
+    await act(async () => {
+      loaded = await result.current.loadConversation('conv-bad');
+    });
+
+    // Malformed JSON -> imagePaths stays undefined so the rest of the message
+    // is still loadable. The user's whole conversation history should not
+    // become an unopenable error dialog because one image_paths value is bad.
+    expect(loaded).toHaveLength(3);
+    expect(loaded[0].imagePaths).toBeUndefined();
+    expect(loaded[0].content).toBe('Look at this');
+    expect(loaded[1].imagePaths).toBeUndefined();
+    expect(loaded[1].content).toBe('I see');
+    expect(loaded[2].imagePaths).toBeUndefined();
+  });
+
   it('loadConversation() sets conversationId to the loaded id', async () => {
     invoke.mockResolvedValueOnce([]);
 
