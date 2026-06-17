@@ -491,6 +491,27 @@ describe('useOllama', () => {
       expect(errorMsg?.errorKind).toBe('Other');
       expect(errorMsg?.content).toBeTruthy();
     });
+
+    it('asserts exactly one assistant message with errorKind Other and no empty placeholder', async () => {
+      invoke.mockRejectedValueOnce(new Error('network error'));
+
+      const { result } = renderHook(() => useOllama());
+
+      await act(async () => {
+        await result.current.ask('test');
+      });
+
+      const messagesWithOther = result.current.messages.filter(
+        (m) => m.errorKind === 'Other',
+      );
+      expect(messagesWithOther).toHaveLength(1);
+      expect(messagesWithOther[0].content).toBeTruthy();
+
+      const emptyAssistant = result.current.messages.find(
+        (m) => m.role === 'assistant' && m.content === '' && !m.errorKind,
+      );
+      expect(emptyAssistant).toBeUndefined();
+    });
   });
 
   // ─── Streaming edge cases ────────────────────────────────────────────────────
