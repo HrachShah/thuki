@@ -306,6 +306,32 @@ describe('useConversationHistory', () => {
     expect(loaded[1].imagePaths).toBeUndefined();
   });
 
+  it('loadConversation() ignores malformed image_paths and warns instead of throwing', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    invoke.mockResolvedValueOnce([
+      {
+        id: 'm1',
+        role: 'user',
+        content: 'Look at this',
+        quoted_text: null,
+        image_paths: 'not-json',
+        thinking_content: null,
+        created_at: 1,
+      },
+    ]);
+
+    const { result } = renderHook(() => useConversationHistory());
+    let loaded: Message[] = [];
+
+    await act(async () => {
+      loaded = await result.current.loadConversation('conv-img-bad');
+    });
+
+    expect(loaded[0].imagePaths).toBeUndefined();
+    expect(warnSpy).toHaveBeenCalled();
+    warnSpy.mockRestore();
+  });
+
   it('loadConversation() sets conversationId to the loaded id', async () => {
     invoke.mockResolvedValueOnce([]);
 
