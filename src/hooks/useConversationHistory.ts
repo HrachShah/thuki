@@ -27,9 +27,23 @@ function toPayload(msg: Message): SaveMessagePayload {
  * frontend `Message`, preserving optional `quotedText`.
  */
 function fromPersisted(msg: PersistedMessage): Message {
-  const imagePaths = msg.image_paths
-    ? (JSON.parse(msg.image_paths) as string[])
-    : undefined;
+  let imagePaths: string[] | undefined;
+  if (msg.image_paths) {
+    try {
+      const parsed = JSON.parse(msg.image_paths);
+      if (Array.isArray(parsed) && parsed.every((p) => typeof p === 'string')) {
+        imagePaths = parsed as string[];
+      } else {
+        console.warn(
+          `[history] dropping malformed image_paths for message ${msg.id}: expected JSON string[]`,
+        );
+      }
+    } catch (err) {
+      console.warn(
+        `[history] failed to parse image_paths for message ${msg.id}: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
+  }
   return {
     id: msg.id,
     role: msg.role as 'user' | 'assistant',
