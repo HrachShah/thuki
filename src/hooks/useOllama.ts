@@ -158,7 +158,8 @@ export function useOllama(
           think: think ?? false,
           onEvent: channel,
         });
-      } catch {
+      } catch (err) {
+        console.warn("[useOllama] Failed to reach Ollama:", err);
         setMessages((prev) => [
           ...prev,
           {
