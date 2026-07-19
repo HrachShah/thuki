@@ -410,7 +410,7 @@ describe('useOllama', () => {
       expect(result.current.isGenerating).toBe(false);
     });
 
-    it('invoke rejection sets isGenerating to false', async () => {
+    it('invoke rejection replaces the assistant placeholder with the error', async () => {
       invoke.mockRejectedValueOnce(new Error('connection refused'));
 
       const { result } = renderHook(() => useOllama());
@@ -420,6 +420,14 @@ describe('useOllama', () => {
       });
 
       expect(result.current.isGenerating).toBe(false);
+      expect(result.current.messages).toHaveLength(2);
+      expect(result.current.messages[1]).toEqual(
+        expect.objectContaining({
+          role: 'assistant',
+          content: 'Something went wrong\nconnection refused',
+          errorKind: 'Other',
+        }),
+      );
     });
 
     it('Error chunk updates assistant placeholder with errorKind', async () => {
