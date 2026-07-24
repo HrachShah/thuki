@@ -158,16 +158,19 @@ export function useOllama(
           think: think ?? false,
           onEvent: channel,
         });
-      } catch {
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: crypto.randomUUID(),
-            role: 'assistant',
-            content: 'Something went wrong\nCould not reach Ollama.',
-            errorKind: 'Other' as const,
-          },
-        ]);
+      } catch (err: unknown) {
+        console.error('ask_ollama invocation failed:', err);
+        setMessages((prev) =>
+          prev.map((message) =>
+            message.id === assistantId
+              ? {
+                  ...message,
+                  content: 'Something went wrong\nCould not reach Ollama.',
+                  errorKind: 'Other',
+                }
+              : message,
+          ),
+        );
         setIsGenerating(false);
       }
     },
