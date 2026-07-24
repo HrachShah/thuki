@@ -489,7 +489,10 @@ describe('useOllama', () => {
         (m) => m.errorKind === 'Other',
       );
       expect(errorMsg?.errorKind).toBe('Other');
-      expect(errorMsg?.content).toBeTruthy();
+      expect(errorMsg?.content).toBe(
+        'Something went wrong\nCould not reach Ollama.',
+      );
+      expect(result.current.messages).toHaveLength(2);
     });
   });
 
